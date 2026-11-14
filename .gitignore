@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual environment
+venv/
+env/
+
+# Local model & binary files
+llama_cpp_bin/
+old_llama_cpp_bin/
+models/
+vectors/
+
+# Generated data
+memory/chroma_db/
+memory/memory.json
+logs/
+
+# Old versions
+old_versions/
+
+# IDE / editor
+.continue/
+.idea/
+.vscode/
+*.swp
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Personal / large data
+about.txt
+dataset_merged.json

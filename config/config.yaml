@@ -1,0 +1,174 @@
+# ============================================
+# TYCHE - Configuration File
+# ============================================
+
+# --- Model settings ---
+model:
+  main_url: "http://127.0.0.1:8000/v1/chat/completions"    # URL of the main LLM server
+  fast_url: "http://127.0.0.1:8001/v1/chat/completions"    # URL of the fast LLM server (validator/summarizer)
+  temperature: 0.9                                         # creativity of the main model (higher = more random)
+  top_p: 0.95                                              # nucleus sampling for the main model
+  frequency_penalty: 0.1                                   # penalty for repeating tokens
+  presence_penalty: 0.0                                    # penalty for introducing new topics
+  stop: ["\nUser:", "\nYou:"]                              # stop sequences
+  stream: true                                             # enable token streaming
+  timeout: 60                                              # request timeout in seconds
+  max_tokens_response: 300                                 # max tokens for main model response (used if not streaming)
+  fast_max_tokens: 200                                     # max tokens for fast model responses (validators/summarizers)
+
+# --- Memory settings ---
+memory:
+  # JSON / SQLite structured facts
+  enable_sqlite: false                                     # whether to use SQLite for structured facts (JSON fallback)
+  sqlite_path: "memory/facts.db"                           # path to SQLite database file
+
+  # ChromaDB vector memory
+  chroma_path: "memory/chroma_db"                          # directory for ChromaDB persistence
+  collection_name: "conversations"                         # name of the ChromaDB collection
+  embedding_model: "paraphrase-multilingual-MiniLM-L12-v2" # sentence-transformers model for embeddings
+
+  # Episode management
+  max_session_episodes: 5                                  # flush hot episodes to Chroma after this many
+  episode_interval: 10                                     # generate episode summary every N messages
+  cold_threshold_days: 30                                  # move episodes to cold layer after N days
+  max_history_messages: 30                                 # keep last N messages in the conversation context
+
+  # Retrieval
+  retrieval_k: 2                                           # number of past episodes to retrieve
+  retrieval_threshold: 0.5                                 # minimum similarity to include an episode in the prompt
+  use_hybrid: true                                         # enable keyword filtering during retrieval
+  warm_threshold: 0.4                                      # similarity threshold for searching the cold layer
+
+# --- State Manager ---
+state:
+  # Base values
+  energy:
+    initial: 0.7                                           # starting energy level
+    decay_rate: 0.05                                       # how fast energy decays per minute
+    min: 0.2
+    max: 1.0
+  dryness:
+    initial: 0.65                                          # starting dryness (wit/sarcasm) level
+    decay_rate: 0.03
+    min: 0.1
+    max: 1.0
+  detachment:
+    initial: 0.7                                           # starting detachment (literalness) level
+    decay_rate: 0.03
+    min: 0.3
+    max: 1.0
+  affection:
+    initial: 0.5                                           # starting affection towards the user
+    decay_rate: 0.01
+    min: 0.1
+    max: 1.0
+
+  sentiment:
+    use_llm: false                                         # use fast LLM for sentiment analysis (if false, keywords are used)
+    positive_keywords:                                     # words that indicate positive reaction (boost affection)
+      - "ахаха"
+      - "смешно"
+      - "забавно"
+      - "спасибо"
+      - "да блять"
+      - "да бля"
+      - "ахах"
+      - "бля"
+      - "дура"
+    negative_keywords:                                     # words that indicate negative reaction (decrease affection)
+      - "плохо"
+      - "ужасно"
+      - "раздраж"
+      - "хватит"
+      - "замолчи"
+      - "прекрати"
+    positive_affection_boost: 0.02                         # how much affection increases on positive reaction
+    negative_affection_penalty: 0.05                       # how much affection decreases on negative reaction
+    negative_detachment_boost: 0.1                         # how much detachment increases on negative reaction
+
+  # Circadian rhythm (time phases in minutes from midnight)
+  phases:
+    - name: day_sleep
+      start: 600    # 10:00
+      end: 1080     # 18:00
+      energy_target: 0.3
+      dryness_target: 0.2
+      detachment_target: 0.8
+    - name: transition
+      start: 1080   # 18:00
+      end: 1260     # 21:00
+      energy_target: 0.5
+      dryness_target: 0.4
+      detachment_target: 0.7
+    - name: peak
+      start: 1260   # 21:00
+      end: 240      # 04:00 (next day)
+      energy_target: 0.8
+      dryness_target: 0.8
+      detachment_target: 0.4
+    - name: post_sleep
+      start: 240    # 04:00
+      end: 600      # 10:00
+      energy_target: 0.4
+      dryness_target: 0.6
+      detachment_target: 0.9
+
+  # Whims
+  spontaneous_whim_chance: 0.05                            # probability of a spontaneous dryness boost each turn
+  whim_boost_min: 0.1                                      # minimum boost amount
+  whim_boost_max: 0.2                                      # maximum boost amount
+
+# --- Fact extraction ---
+facts:
+  min_length: 5                                            # minimum character length for an extracted fact value
+  stop_phrases: ["что-то", "это", "ничего", "всё", "так", "просто"]   # phrases to ignore during fact extraction
+  allowed_types: ["identity", "gender", "age", "city"]     # fact types that are stored in structured memory (others go to episodes)
+  default_importance: 0.7                                  # default importance for new facts
+
+# --- Summarization ---
+summarization:
+  conversation_prompt: |                                   # prompt template for generating a short conversation summary
+    Summarize the following conversation in 2-3 concise sentences.
+    Focus on what the user revealed about themselves and the main topics discussed.
+    
+    Conversation:
+    {dialog_text}
+    
+    Summary:
+  
+  episode_prompt: |
+    Прочитай диалог и напиши сжатое резюме (2-4 предложения) на языке диалога в третьем лице.
+    Сохрани ключевые события, имена, отношения, решения и планы.
+    Пример (RU): "Пользователь рассказал, что мама его друга попросила помочь с посадкой картошки."
+    Example (EN): "The user mentioned that their friend's mother asked for help with planting potatoes."
+    Не обращайся к собеседнику, не пиши от лица ассистента.
+    Диалог:
+    {dialog_text}
+    Резюме / Summary:
+
+# --- Inner monologue (optional) / Внутренний монолог (опционально) ---
+inner_monologue:
+  enabled: false                                           # Enable inner thoughts / Включить внутренние мысли
+  prompt: |
+    [SYSTEM: This is an internal thought process. The user will NOT see this. Do not answer the user.]
+    Your current internal state: energy={energy:.2f}, dryness={dryness:.2f}, detachment={detachment:.2f}.
+    The user just said: "{user_input}"
+    
+    Write ONE short internal thought (maximum 15 words). It must be dry, detached, and slightly ironic. 
+    Do NOT greet the user. Do NOT answer the question. Just a fleeting thought passing through your mind.
+    
+    [LANGUAGE RULE]: Write in the same language as the user's message.
+    Output ONLY the thought text.
+
+# --- Persona ---
+persona:
+  file: "config/persona.txt"                               # path to the file containing the base persona description
+
+# --- Debug ---
+debug:
+  print_system_prompt: false                               # print the full system prompt on every turn
+  print_state: true                                        # print current state parameters (energy, dryness, etc.)
+  print_ram: true                                          # print number of retrieved RAM fragments
+  print_memory_changes: true                               # print when JSON memory is updated
+  print_ram_retrieval: true                                # print detailed info about retrieved RAM episodes
+  print_episode_summary: true                              # print generated episode summaries
