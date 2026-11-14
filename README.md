@@ -10,36 +10,25 @@ A **local AI companion** with a persistent, evolving personality. Runs entirely 
 
 ## How It Works
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        run.py (entry)                           │
-└──────────────────────────────┬──────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     core/orchestrator.py                        │
-│                                                                 │
-│   ┌───────────┐   ┌──────────────┐   ┌────────────────────┐    │
-│   │  State    │   │   Memory     │   │  System Prompt     │    │
-│   │  Manager  │──▶│   Pipeline   │──▶│  Builder           │    │
-│   │           │   │              │   │                    │    │
-│   │ energy    │   │ regex → LLM  │   │ persona + rules    │    │
-│   │ dryness   │   │ validate →   │   │ + style + facts    │    │
-│   │ detachmnt │   │ store        │   │ + RAM episodes     │    │
-│   │ affection │   │              │   │ + context summary  │    │
-│   └───────────┘   └──────┬───────┘   └────────────────────┘    │
-│                          │                                      │
-│                          ▼                                      │
-│               ┌─────────────────────┐                           │
-│               │  memory.json        │  ← base facts             │
-│               │  ChromaDB (warm/    │  ← episode summaries      │
-│               │  cold layers)       │                           │
-│               └─────────────────────┘                           │
-│                                                                 │
-│   ┌─────────────────────────────────────────────────────────┐   │
-│   │  llama.cpp server (main, :8000)  +  fast model (:8001)  │   │
-│   └─────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    A[run.py <br> Entry Point] --> B[core/orchestrator.py]
+    
+    subgraph Orchestrator
+        B1(State Manager <br> energy, dryness, detach, affection)
+        B2(Memory Pipeline <br> regex → LLM → validate)
+        B3(System Prompt Builder <br> persona + rules + facts)
+        
+        B1 -->|State data| B2
+        B2 -->|Extracted facts| B3
+        B2 --> DB[(memory.json / ChromaDB)]
+    end
+    
+    B --> B1
+    B --> B2
+    B --> B3
+    
+    B3 --> LLM[llama.cpp server <br> Main :8000 + Fast :8001]
 ```
 
 ### Two Local Models
