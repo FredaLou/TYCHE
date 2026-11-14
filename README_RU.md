@@ -103,7 +103,6 @@ graph TD
 ├── run.py                  # точка входа
 ├── start_server.bat        # лаунчер: модель + control vector + валидатор
 ├── start_server_upd.bat    # лаунчер: модель + speculative decoding
-├── start_venv.bat          # создание venv
 ├── requirements.txt
 ├── LICENSE                 # MIT (код)
 ├── LICENSE-PERSONA         # All Rights Reserved (персона Тихе)
@@ -157,10 +156,6 @@ To see what's coming next, current known issues, and our development plans, plea
    ```
 
 2. **Создать и активировать venv**
-   ```bat
-   start_venv.bat
-   ```
-   или вручную:
    ```bat
    python -m venv venv
    venv\Scripts\activate
