@@ -13,21 +13,20 @@ A **local AI companion** with a persistent, evolving personality. Runs entirely 
 ```mermaid
 graph TD
     A[run.py <br> Entry Point] --> B[core/orchestrator.py]
-    
+
     subgraph Orchestrator
         B1(State Manager <br> energy, dryness, detach, affection)
         B2(Memory Pipeline <br> regex → LLM → validate)
         B3(System Prompt Builder <br> persona + rules + facts)
-        
-        B1 -->|State data| B2
+        DB[(memory.json / <br> ChromaDB)]
+
+        B1 -->|State data| B3
         B2 -->|Extracted facts| B3
-        B2 --> DB[(memory.json / ChromaDB)]
+        B2 <--> DB
     end
-    
+
     B --> B1
     B --> B2
-    B --> B3
-    
     B3 --> LLM[llama.cpp server <br> Main :8000 + Fast :8001]
 ```
 
