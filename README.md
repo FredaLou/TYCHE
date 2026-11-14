@@ -1,6 +1,11 @@
-# TYCHE
+![Status](https://img.shields.io/badge/status-alpha--WIP-orange)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 
-> *"I am not your assistant. I am not your oracle. I simply decided to stay."*
+**English** | [Русский](README_RU.md)
+
+# TYCHE
 
 A **local AI companion** with a persistent, evolving personality. Runs entirely on [llama.cpp](https://github.com/ggerganov/llama.cpp) — zero cloud dependencies, zero telemetry.
 
