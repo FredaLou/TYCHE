@@ -103,7 +103,6 @@ Every user message passes through:
 ├── run.py                  # entry point
 ├── start_server.bat        # launcher: model + control vector + validator
 ├── start_server_upd.bat    # launcher: model + speculative decoding
-├── start_venv.bat          # venv bootstrap
 ├── requirements.txt
 ├── LICENSE                 # MIT (code)
 ├── LICENSE-PERSONA         # All Rights Reserved (Tyche persona)
@@ -157,10 +156,6 @@ To see what's coming next, current known issues, and our development plans, plea
    ```
 
 2. **Create & activate venv**
-   ```bat
-   start_venv.bat
-   ```
-   or manually:
    ```bat
    python -m venv venv
    venv\Scripts\activate
