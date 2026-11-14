@@ -129,6 +129,17 @@ Every user message passes through:
 
 ---
 
+
+## 🗺️ Roadmap / Дорожная карта
+
+To see what's coming next, current known issues, and our development plans, please check out the full Roadmap.
+
+Чтобы узнать о планах на будущее, текущих проблемах и этапах разработки, ознакомьтесь с нашей Дорожной картой.
+
+➡️ **[English Roadmap (ROADMAP.md)](ROADMAP.md)**
+➡️ **[Русская дорожная карта (ROADMAP_RU.md)](ROADMAP_RU.md)**
+
+
 ## Setup
 
 ### Prerequisites
